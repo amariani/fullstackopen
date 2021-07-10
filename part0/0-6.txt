@@ -1,0 +1,19 @@
+browser->server: HTTP POST https://studies.cs.helsinki.fi/exampleapp/new_note_spa
+note over browser:
+The browser sends to the server the note in JSON format
+{
+    "content":"Another beautiful note",
+    "date":"2021-07-10T18:43:40.797Z"
+}
+end note
+server-->browser: 201 Created
+note over server:
+server responds with HTTP 201 status and as
+the onSubmit function has a preventDefault() function
+there is no redirect or reload
+end note
+
+note over browser:
+sendToServer function adds the new note to the list notes.push(neNote)
+and redrawnotes is executed
+end note
