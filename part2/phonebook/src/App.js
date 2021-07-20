@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import Filter from "./components/Filter";
 import Form from "./components/Form";
+import NotificationMesage from "./components/NotificationMesage";
 import Persons from "./components/Persons";
 import personsService from "./services/persons";
 
@@ -9,6 +10,8 @@ const App = () => {
   const [newName, setNewName] = useState("");
   const [newPhone, setNewPhone] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
+  const [notificationType, setNotificationType] = useState(null);
+  const [notificationMessage, setMotificationMessage] = useState(null);
 
   useEffect(() => {
     personsService.getAll().then((initialPersons) => {
@@ -45,17 +48,28 @@ const App = () => {
           .update(duplicatedPerson.id, newPersonData)
           .then((res) => {
             setPersons(persons.map((p) => (p.name !== newName ? p : res)));
+            setNotificationType("success");
+            setMotificationMessage(`Updated ${newName}`);
           })
           .catch((e) => {
             console.error(`Error:`, e);
+            setNotificationType("error");
+            setMotificationMessage(`${newName} could not be updated`);
           });
       }
     } else {
       const newPerson = { name: newName, number: newPhone };
       personsService.create(newPerson).then((newPersonResponse) => {
         setPersons(persons.concat(newPersonResponse));
+        setNotificationType("success");
+        setMotificationMessage(`Added ${newName}`);
       });
     }
+
+    // Notification cleanup
+    setTimeout(() => {
+      setMotificationMessage(null);
+    }, 3000);
 
     setNewName("");
     setNewPhone("");
@@ -79,15 +93,31 @@ const App = () => {
         .remove(id)
         .then(() => {
           setPersons(persons.filter((p) => p.id !== id));
+          setNotificationType("success");
+          setMotificationMessage(`Removed ${personFound.name}`);
         })
         .catch((e) => {
           console.error(`Error:`, e);
+          setNotificationType("error");
+          setMotificationMessage(
+            `${personFound.name} has already been removed from database.`
+          );
+          setPersons(persons.filter((p) => p.id !== id));
         });
+
+      // Notification cleanup
+      setTimeout(() => {
+        setMotificationMessage(null);
+      }, 3000);
     }
   };
   return (
     <div>
       <h2>Phonebook</h2>
+      <NotificationMesage
+        notificationType={notificationType}
+        message={notificationMessage}
+      />
       <Filter
         searchTerm={searchTerm}
         filterChangeHandler={handleFilterChange}
